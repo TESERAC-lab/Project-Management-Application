@@ -1,0 +1,17 @@
+ {
+  "name": "project-management-application",
+  "version": "1.0.0",
+  "description": "a project management application for begginers",
+  "keywords": [
+    "backend",
+    "API",
+    "creation"
+  ],
+  "license": "ISC",
+  "author": "Prathmesh Gauri",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "wow": "node index.js"
+  }
+}
