@@ -1,17 +1,21 @@
- {
-  "name": "project-management-application",
+{
+  "name": "21-building-complete-backend",
   "version": "1.0.0",
-  "description": "a project management application for begginers",
+  "description": "a porject management application",
   "keywords": [
     "backend",
-    "API",
-    "creation"
+    "api",
+    "api",
+    "authentication"
   ],
   "license": "ISC",
   "author": "Prathmesh Gauri",
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "wow": "node index.js"
+    "dev": "node index.js"
+  },
+  "devDependencies": {
+    "prettier": "3.9.6"
   }
 }

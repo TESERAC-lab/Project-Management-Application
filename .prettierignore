@@ -1,0 +1,29 @@
+node_modules
+dist
+build
+coverage
+.cache
+.vite
+.next
+out
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Lock files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Generated files
+*.min.js
+*.min.css
+*.map
+
+# IDE / OS
+.vscode
+.idea
+.DS_Store
+Thumbs.db
