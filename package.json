@@ -1,7 +1,15 @@
 {
-  "name": "21-building-complete-backend",
-  "version": "1.0.0",
+  "author": "Prathmesh Gauri",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1"
+  },
   "description": "a porject management application",
+  "devDependencies": {
+    "nodemon": "^3.1.14",
+    "prettier": "3.9.6"
+  },
   "keywords": [
     "backend",
     "api",
@@ -9,13 +17,12 @@
     "authentication"
   ],
   "license": "ISC",
-  "author": "Prathmesh Gauri",
-  "type": "module",
   "main": "index.js",
+  "name": "21-building-complete-backend",
   "scripts": {
-    "dev": "node index.js"
+    "dev": "nodemon src/index.js",
+    "start": "node src/index.js"
   },
-  "devDependencies": {
-    "prettier": "3.9.6"
-  }
+  "type": "module",
+  "version": "1.0.0"
 }
