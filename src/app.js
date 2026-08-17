@@ -18,4 +18,14 @@ app.use(
   }),
 );
 
+app.get("/", (req ,res)=>{
+  res.send("Welcome to PRJ-MGT")
+})
+
+//ROUTE IMPORTS
+
+import healthCheckRouter from './Routes/healthCheck.routes.js';
+
+app.use('/api/v1/healthcheck', healthCheckRouter);
+
 export default app;
