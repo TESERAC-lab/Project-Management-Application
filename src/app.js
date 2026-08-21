@@ -23,9 +23,11 @@ app.get("/", (req ,res)=>{
 })
 
 //ROUTE IMPORTS
+import authRouters from ".//Routes/auth.routes.js"
 
 import healthCheckRouter from './Routes/healthCheck.routes.js';
 
 app.use('/api/v1/healthcheck', healthCheckRouter);
+app.use('/api/v1/auth', authRouters);
 
 export default app;
