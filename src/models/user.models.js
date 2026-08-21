@@ -8,14 +8,14 @@ const userSchema = new Schema(
     avatar: {
       type: {
         url: String,
-        localPath: string,
+        localPath: String,
       },
       default: {
         url: `https://placehold.co/400x400`,
         localPath: '',
       },
     },
-    userName: {
+    username: {
       type: String,
       required: true,
       unique: true,
@@ -30,7 +30,7 @@ const userSchema = new Schema(
       lowercase: true,
       trim: true,
     },
-    fullName: {
+    fullname: {
       type: String,
       required: true,
       trim: true,
@@ -52,21 +52,20 @@ const userSchema = new Schema(
     forgotPawssrodExpiry: {
       type: Date,
     },
-    emailVerficationToken: {
+    emailVerificationToken: {
       type: String,
     },
-    emailVerficationExpiry: {
+    emailVerificationExpiry: {
       type: Date,
     },
   },
   { timestamps: true },
 );
 
-userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next();
+userSchema.pre('save', async function () {
+  if (!this.isModified('password')) return;
 
   this.password = await bcrypt.hash(this.password, 10);
-  next();
 });
 
 userSchema.methods.isPasswordCorrect = async function (password) {
@@ -77,8 +76,8 @@ userSchema.methods.generateAccessToken = function () {
   return jwt.sign(
     {
       _id: this._id,
-      emial: this.email,
-      userName: this.userName,
+      email: this.email,
+      username: this.username,
     },
     process.env.ACCESS_TOKEN_SECRET,
     { expiresIn: process.env.ACCESS_TOKEN_EXPIRY },
@@ -96,7 +95,7 @@ userSchema.methods.generateRefreshToken = function () {
 };
 
 userSchema.methods.generateTemporaryToken = function () {
-  const unHashedToken = crypto.randomBytes().toString('hex');
+  const unHashedToken = crypto.randomBytes(32).toString('hex');
   const hashedToken = crypto.createHash('sha256').update(unHashedToken).digest('hex');
   const tokenExpiry = Date.now() + 20 * 60 * 1000; // 20 minutes
 
