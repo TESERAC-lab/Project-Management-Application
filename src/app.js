@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 
 const app = express();
 
@@ -7,6 +8,7 @@ const app = express();
 app.use(express.json({ limit: '16kb' }));
 app.use(express.urlencoded({ extended: true, limit: '16kb' }));
 app.use(express.static('public'));
+app.use(cookieParser());
 
 //CORS CONFIGS
 app.use(
@@ -18,12 +20,12 @@ app.use(
   }),
 );
 
-app.get("/", (req ,res)=>{
-  res.send("Welcome to PRJ-MGT")
-})
+app.get('/', (req, res) => {
+  res.send('Welcome to PRJ-MGT');
+});
 
 //ROUTE IMPORTS
-import authRouters from ".//Routes/auth.routes.js"
+import authRouters from './/Routes/auth.routes.js';
 
 import healthCheckRouter from './Routes/healthCheck.routes.js';
 
