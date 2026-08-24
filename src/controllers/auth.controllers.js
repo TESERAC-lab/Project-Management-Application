@@ -2,7 +2,11 @@ import { User } from '../models/user.models.js';
 import { apiResponse } from '../utils/api-Response.js';
 import { asyncHandlers } from '../utils/async-handlers.js';
 import { apiError } from '../utils/api-Errors.js';
-import { emailVerificationMailgenContent, sendEmail } from '../utils/mail.js';
+import {
+  emailVerificationMailgenContent,
+  forgotPasswordMailgenContent,
+  sendEmail,
+} from '../utils/mail.js';
 import jwt from 'jsonwebtoken';
 
 const generateAccessTokenAndRefreshToken = async (userId) => {
@@ -236,26 +240,55 @@ const refreshAccessToken = asyncHandlers(async (req, res) => {
 
     user.refreshToken = newRefreshToken;
 
-    await user.save()
+    await user.save();
 
-    return res 
-          .status(200)
-          .cookie("accessToken",accessToken,options)
-          .cookie("refreshToken",newRefreshToken,options)
-          .json(
-            new apiResponse(
-              200,
-              {
-                accessToken,
-                refreshToken :newRefreshToken
-              },
-              "Access token refreshed"
-            )
-          )
+    return res
+      .status(200)
+      .cookie('accessToken', accessToken, options)
+      .cookie('refreshToken', newRefreshToken, options)
+      .json(
+        new apiResponse(
+          200,
+          {
+            accessToken,
+            refreshToken: newRefreshToken,
+          },
+          'Access token refreshed',
+        ),
+      );
   } catch (error) {
     throw new apiError(401, ' Invalid refresh token');
   }
 });
+const forgotPasswordRequest = asyncHandlers(async (req, res) => {
+  const { email } = req.body;
+
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    throw new apiError(404, 'User does not exist', []);
+  }
+
+  const { unHashedToken, hashedToken, tokenExpiry } = user.generateTemporaryToken();
+
+  user.fogotPasswrodToken = hashedToken;
+  user.forgotPawssrodExpiry = tokenExpiry;
+
+  await user.save({ validateBeforeSave: false });
+
+  await sendEmail({
+    email: user?.email,
+    subject: 'Password reset request',
+    mailgenContent: forgotPasswordMailgenContent(
+      user.username,
+      `${process.env.FORGOT_PASSWORD_REDIRECT_URL}/${unHashedToken}`,
+    ),
+  });
+  return res
+    .status(200)
+    .json(new apiResponse(200, {}, 'Password reset mail has been sent on your email'));
+});
+
 //const getCurrentUser = asyncHandlers(async (req, res) => {});
 
 export {
