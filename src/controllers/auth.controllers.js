@@ -132,7 +132,7 @@ const logoutUser = asyncHandlers(async (req, res) => {
       },
     },
     {
-      new: true,
+      returnDocument: 'after',
     },
   );
   const options = {
@@ -317,21 +317,13 @@ const changeCurrentPassword = asyncHandlers(async (req, res) => {
 
   const isPasswordValid = await user.isPasswordCorrect(oldPassword);
 
-  if(!isPasswordValid){
-    throw new apiError(400 , "Password is invalid")
+  if (!isPasswordValid) {
+    throw new apiError(400, 'Password is invalid');
   }
-  user.password = newPassword
-  await user.save({validateBeforeSave:false})
+  user.password = newPassword;
+  await user.save({ validateBeforeSave: false });
 
-  return res
-  .status(200)
-  .json(
-    new apiResponse(
-      200,
-      {},
-      "Password changed successfully"
-    )
-  )
+  return res.status(200).json(new apiResponse(200, {}, 'Password changed successfully'));
 });
 
 export {
