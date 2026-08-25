@@ -51,9 +51,13 @@ const userForgotpasswordValidator = () => {
   ];
 };
 
+const userResetForgotPasswordValidaotr = () => {
+  return [body('newPassword').notEmpty().withMessage('Password is reqiured')];
+};
 export {
   userRegisterValidators,
   userLoginValidators,
   userChangeCurrentPasswordValidator,
   userForgotpasswordValidator,
+  userResetForgotPasswordValidaotr,
 };
