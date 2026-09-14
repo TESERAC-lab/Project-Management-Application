@@ -8,7 +8,57 @@ import mongoose from 'mongoose';
 import { UserRoleEnum } from '../utils/Fixed.js';
 
 const getProject = asyncHandlers(async (req, res) => {
-  //test
+  const projects = await ProjectMember.aggregate([
+    {
+      $match: {
+        user: new mongoose.Types.ObjectId(req.user._id),
+      },
+    },
+    {
+      $lookup: {
+        from: 'projects',
+        localField: 'projects',
+        foreignField: '_id',
+        as: 'projects',
+        pipeline: [
+          {
+            $lookup: {
+              from: 'projectmembers',
+              localField: '_id',
+              foreignField: 'projects',
+              as: 'projectsmembers',
+            },
+          },
+          {
+            $addFields: {
+              members: {
+                $size: 'projectsmembers',
+              },
+            },
+          },
+        ],
+      },
+    },
+    {
+      $unwind: '$project',
+    },
+    {
+      $project: {
+        project: {
+          _id: 1,
+          name: 1,
+          description: 1,
+          members: 1,
+          createdAt: 1,
+          createdBy: 1,
+        },
+        role: 1,
+        _id: 0,
+      },
+    },
+  ]);
+
+  return res.status(200).json(new apiResponse(200, projects, 'Projects fetched successfully'));
 });
 
 const getProjectById = asyncHandlers(async (req, res) => {
@@ -56,14 +106,14 @@ const updateProject = asyncHandlers(async (req, res) => {
 });
 
 const deleteProject = asyncHandlers(async (req, res) => {
-  const {projectId} = req.params
-  const project = await Project.findByIdAndDelete(projectId)
+  const { projectId } = req.params;
+  const project = await Project.findByIdAndDelete(projectId);
 
   if (!project) {
     throw new apiError(404, 'Project not found');
   }
 
-  return res.status(200).json(200, project , 'Project deleted successfully');
+  return res.status(200).json(200, project, 'Project deleted successfully');
 });
 
 const addMembersToProject = asyncHandlers(async (req, res) => {
