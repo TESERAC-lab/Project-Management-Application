@@ -5,7 +5,7 @@ import { apiResponse } from '../utils/api-Response.js';
 import { asyncHandlers } from '../utils/async-handlers.js';
 import { apiError } from '../utils/api-Errors.js';
 import mongoose from 'mongoose';
-import { UserRoleEnum } from '../utils/Fixed.js';
+import { AvaulableUserRole, UserRoleEnum } from '../utils/Fixed.js';
 
 const getProject = asyncHandlers(async (req, res) => {
   const projects = await ProjectMember.aggregate([
@@ -155,11 +155,62 @@ const addMembersToProject = asyncHandlers(async (req, res) => {
 });
 
 const getProjectMembers = asyncHandlers(async (req, res) => {
-  //test
+  const { projectId } = req.params;
+
+  const project = await Project.findById(req.params);
+
+  if (!project) {
+    throw new apiError(404, 'Project not found');
+  }
+
+  const porjectMembers = await ProjectMember.aggregate([
+    {
+      $match: {
+        porject: new mongoose.Types.ObjectId(projectId),
+      },
+    },
+    {
+      $lookup: {
+        from: 'users',
+        localField: 'user',
+        foreignField: '_id',
+        as: 'user',
+        pipeline: [
+          {
+            $project: {
+              _id: 1,
+              username: 1,
+              fullName: 1,
+              avatar: 1,
+            },
+          },
+        ],
+      },
+    },
+    {
+      $addFields: {
+        user: {
+          $arrayElemAt: ['$user', 0],
+        },
+      },
+    },
+    {
+      $project: {
+        porject: 1,
+        user: 1,
+        role: 1,
+        createdAt: 1,
+        updatedAt: 1,
+        _id: 0,
+      },
+    },
+  ]);
+
+  return res.status(200).josn(new apiResponse(200, porjectMembers, 'Project members fetched'));
 });
 
 const updateMemberRole = asyncHandlers(async (req, res) => {
-  //test
+  
 });
 
 const deleteMember = asyncHandlers(async (req, res) => {
