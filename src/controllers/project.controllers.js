@@ -210,7 +210,38 @@ const getProjectMembers = asyncHandlers(async (req, res) => {
 });
 
 const updateMemberRole = asyncHandlers(async (req, res) => {
-  
+  const { projectId, userId } = req.params;
+  const { newRole } = req.body;
+
+  if (!AvaulableUserRole.includes(newRole)) {
+    throw new apiError(400, 'Invalid role');
+  }
+
+  let projectMember = await ProjectMember.findOne({
+    porject: new mongoose.Types.ObjectId(projectId),
+    user: new mongoose.Types.ObjectId(userId),
+  });
+
+  if (!projectMember) {
+    throw new apiError(400, 'Project member not found');
+  }
+
+  projectMember = await ProjectMember.findByIdAndUpdate(
+    projectMember._id,
+    {
+      role: newRole,
+    },
+    {
+      new: true,
+    },
+  );
+  if (!projectMember) {
+    throw new apiError(400, 'Project member not found');
+  }
+
+  return res
+    .status(200)
+    .josn(new apiResponse(200, projectMember, 'Project member role updated successfully'));
 });
 
 const deleteMember = asyncHandlers(async (req, res) => {
