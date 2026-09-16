@@ -1,4 +1,5 @@
 import { body } from 'express-validator';
+import { AvaulableUserRole } from '../utils/Fixed.js';
 
 const userRegisterValidators = () => {
   return [
@@ -54,10 +55,33 @@ const userForgotpasswordValidator = () => {
 const userResetForgotPasswordValidaotr = () => {
   return [body('newPassword').notEmpty().withMessage('Password is reqiured')];
 };
+
+const createProjectValidaotr = () => {
+  return [body('name').notEmpty().withMessage('Name is required'), body('description').optional()];
+};
+
+const addMemberToProjectValidaotr = () => {
+  return [
+    body('email')
+      .trim()
+      .notEmpty()
+      .withMessage('Email is required')
+      .isEmail()
+      .withMessage('Email is invalid'),
+    body('role')
+      .notEmpty()
+      .withMessage('Role is required')
+      .isIn(AvaulableUserRole)
+      .withMessage('Role is invalid'),
+  ];
+};
+
 export {
   userRegisterValidators,
   userLoginValidators,
   userChangeCurrentPasswordValidator,
   userForgotpasswordValidator,
   userResetForgotPasswordValidaotr,
+  createProjectValidaotr,
+  addMemberToProjectValidaotr,
 };
