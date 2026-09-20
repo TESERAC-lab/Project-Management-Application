@@ -12,7 +12,30 @@ const getTask = asyncHandlers(async (req, res) => {
   //chacha
 });
 const createTask = asyncHandlers(async (req, res) => {
-  //chacha
+  const { title, description, assignedTo, status } = req.body;
+  const { projectId } = req.params;
+  const project = await Project.findById(projectId);
+
+  if (!project) {
+    throw new apiError(404, 'Project not found');
+  }
+  const files = req.files || [];
+  const attachments = files.map((file) => {
+    return {
+      url: `${process.env.SERVER_URL}/images/${files.originalname}`,
+      mimetype: file.mimetype,
+      size: file.size,
+    };
+  });
+  const task = await Task.create({
+    title,
+    description,
+    project: new mongoose.Types.ObjectId(projectId),
+    assignedTo: assignedTo ? new mongoose.Types.ObjectId(assignedTo) : undefined,
+    status,
+    assignedBy: new mongoose.Types.ObjectId(req.User._id),
+  });
+  return res.status(201).json(new apiResponse(201, task, 'Task created successfully'));
 });
 const getTaskById = asyncHandlers(async (req, res) => {
   //chacha
