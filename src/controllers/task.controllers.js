@@ -9,8 +9,9 @@ import mongoose from 'mongoose';
 import { AvaulableUserRole, UserRoleEnum } from '../utils/Fixed.js';
 
 const getTask = asyncHandlers(async (req, res) => {
-  const { title, description, assignedTo, status } = req.body;
   const { projectId } = req.params;
+
+  const project = await Project.findById(projectId);
 
   if (!project) {
     throw new apiError(404, 'Project not found');
@@ -40,6 +41,7 @@ const createTask = asyncHandlers(async (req, res) => {
   const task = await Task.create({
     title,
     description,
+    attachments,
     project: new mongoose.Types.ObjectId(projectId),
     assignedTo: assignedTo ? new mongoose.Types.ObjectId(assignedTo) : undefined,
     status,
@@ -63,10 +65,12 @@ const getTaskById = asyncHandlers(async (req, res) => {
         as: 'assignedTo',
         pipeline: [
           {
-            _id: 1,
-            username: 1,
-            fullname: 1,
-            avatar: 1,
+            $project: {
+              _id: 1,
+              username: 1,
+              fullname: 1,
+              avatar: 1,
+            },
           },
         ],
       },
@@ -122,19 +126,107 @@ const getTaskById = asyncHandlers(async (req, res) => {
   return res.status(200).json(new apiResponse(200, task[0], 'Task fetched successfully'));
 });
 const updateTask = asyncHandlers(async (req, res) => {
-  //chacha
+  const { taskId } = req.params;
+
+  const { title, description, assignedTo, status } = req.body;
+
+  const task = await Task.findById(taskId);
+
+  if (!task) {
+    throw new apiError(404, 'Task not found');
+  }
+
+  const updateData = {};
+
+  if (title !== undefined) {
+    updateData.title = title;
+  }
+
+  if (description !== undefined) {
+    updateData.description = description;
+  }
+
+  if (status !== undefined) {
+    updateData.status = status;
+  }
+
+  if (assignedTo !== undefined) {
+    updateData.assignedTo = new mongoose.Types.ObjectId(assignedTo);
+  }
+
+  const updatedTask = await Task.findByIdAndUpdate(taskId, updateData, {
+    new: true,
+    runValidators: true,
+  });
+
+  return res.status(200).json(new apiResponse(200, updatedTask, 'Task updated successfully'));
 });
 const deleteTask = asyncHandlers(async (req, res) => {
-  //chacha
+  const { taskId } = req.params;
+
+  const task = await Task.findByIdAndDelete(taskId);
+
+  if (!task) {
+    throw new apiError(404, 'Task not found');
+  }
+
+  return res.status(200).json(new apiResponse(200, task, 'Task deleted successfully'));
 });
 const createSubTask = asyncHandlers(async (req, res) => {
-  //chacha
+  const { taskId } = req.params;
+
+  const { title } = req.body;
+
+  const task = await Task.findById(taskId);
+
+  if (!task) {
+    throw new apiError(404, 'Task not found');
+  }
+
+  const subtask = await subTask.create({
+    title,
+    task: new mongoose.Types.ObjectId(taskId),
+    createdBy: new mongoose.Types.ObjectId(req.User._id),
+  });
+
+  return res.status(201).json(new apiResponse(201, subtask, 'Subtask created successfully'));
 });
 const deleteSubTask = asyncHandlers(async (req, res) => {
-  //chacha
+  const { subTaskId } = req.params;
+
+  const deletedSubTask = await subTask.findByIdAndDelete(subTaskId);
+
+  if (!deletedSubTask) {
+    throw new apiError(404, 'Subtask not found');
+  }
+
+  return res.status(200).json(new apiResponse(200, deletedSubTask, 'Subtask deleted successfully'));
 });
 const updateSubTask = asyncHandlers(async (req, res) => {
-  //chacha
+  const { subTaskId } = req.params;
+
+  const { title, isCompleted } = req.body;
+
+  const updateData = {};
+
+  if (title !== undefined) {
+    updateData.title = title;
+  }
+
+  if (isCompleted !== undefined) {
+    updateData.isCompleted = isCompleted;
+  }
+
+  const updatedSubTask = await subTask.findByIdAndUpdate(subTaskId, updateData, {
+    new: true,
+    runValidators: true,
+  });
+
+  if (!updatedSubTask) {
+    throw new apiError(404, 'Subtask not found');
+  }
+
+  return res.status(200).json(new apiResponse(200, updatedSubTask, 'Subtask updated successfully'));
 });
 
 export {
